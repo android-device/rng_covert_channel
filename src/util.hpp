@@ -20,5 +20,7 @@
 CYCLES measure_one_block_access_time(ADDR_PTR addr);
 CYCLES measure_one_rdseed_time();
 CYCLES measure_n_rdseed_time(unsigned int n);
+uint32_t num_valid_rdseed();
+uint32_t test_n_rdseed(uint32_t n);
 
 #endif

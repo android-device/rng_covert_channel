@@ -27,11 +27,10 @@ CYCLES measure_one_rdseed_time()
     CYCLES cycles;
 
     asm volatile(
-    "lfence\n\t"
     "rdtsc\n\t"
     "mov %%eax, %%edi\n\t"
-    "rdrand %%edx\n\t"
-    "lfence\n\t"
+    "try%=: rdseed %%edx\n\t"
+    "jnc try%=\n\t"
     "rdtsc\n\t"
     "sub %%edi, %%eax\n\t"
     : "=a"(cycles) 
@@ -49,14 +48,13 @@ CYCLES measure_n_rdseed_time(unsigned int n)
 
     asm volatile(
     "movl %1, %%ecx\n\t"
-    "lfence\n\t"
     "rdtsc\n\t"
     "mov %%eax, %%edi\n\t"
-    "loop: \n\t"
-    "rdrand %%edx\n\t"
+    "loop%=: \n\t"
+    "try%=: rdseed %%edx\n\t"
+    "jnc try%=\n\t"
     "decl %%ecx\n\t"
-    "jne loop \n\t"
-    "lfence\n\t"
+    "jne loop%= \n\t"
     "rdtsc\n\t"
     "sub %%edi, %%eax\n\t"
     : "=a"(cycles) 
@@ -65,3 +63,44 @@ CYCLES measure_n_rdseed_time(unsigned int n)
 
     return cycles;
 }
+
+uint32_t num_valid_rdseed()
+{
+    uint32_t num_calls;
+    uint32_t max = 1<<20;
+    asm volatile(
+    "movl %1, %%eax\n\t"
+    "incl %%eax\n\t"
+    "loop%=: \n\t"
+    "decl %%eax\n\t"
+    "je done%=\n\t"
+    "rdseed %%edx\n\t"
+    "jc loop%=\n\t"
+    "done%=:\n\t"
+    : "=a"(num_calls) 
+    : "r"(max) 
+    : "cc", "edx"); 
+
+    return max-num_calls;
+}
+
+uint32_t test_n_rdseed(uint32_t n)
+{
+    uint32_t good = 1;
+    asm volatile(
+    "movl %1, %%eax\n\t"
+    "incl %%eax\n\t"
+    "loop%=: \n\t"
+    "decl %%eax\n\t"
+    "je done%=\n\t"
+    "rdseed %%edx\n\t"
+    "jc loop%=\n\t"
+    "movl $0, %1\n\t"
+    "done%=:\n\t"
+    : "=a"(good) 
+    : "r"(n) 
+    : "cc", "edx"); 
+
+    return good;
+}
+

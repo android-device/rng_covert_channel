@@ -11,7 +11,7 @@ CFLAGS=-std=c++11 -I /usr/local
 CC=g++
 
 
-TARGETS=sender receiver test
+TARGETS=sender receiver test rd_rx rd_tx
 UTILS=util.o 
 
 all: $(TARGETS)
