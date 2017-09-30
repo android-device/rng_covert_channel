@@ -22,5 +22,61 @@ CYCLES measure_one_rdseed_time();
 CYCLES measure_n_rdseed_time(unsigned int n);
 uint32_t num_valid_rdseed();
 uint32_t test_n_rdseed(uint32_t n);
+void nops(uint32_t n);
+
+// RDSEED Recursive Template
+// recoursive step
+template
+    <
+      size_t   count
+    >
+void do_n_rdseed() {
+    asm volatile(
+    "rdseed %%edx\n\t"
+    "rdseed %%edx\n\t"
+    "rdseed %%edx\n\t"
+    "rdseed %%edx\n\t"
+    : 
+    : 
+    : "edx"); 
+    do_n_rdseed<(count - 4)/2>();
+    do_n_rdseed<(count-4) - ((count - 4)/2)>();
+}
+
+// base of recursion
+template<>
+inline void do_n_rdseed<0>() {
+}
+template<>
+inline void do_n_rdseed<1>() {
+
+    asm volatile(
+    "rdseed %%edx\n\t"
+    : 
+    : 
+    : "edx"); 
+
+}
+template<>
+inline void do_n_rdseed<2>() {
+
+    asm volatile(
+    "rdseed %%edx\n\t"
+    "rdseed %%edx\n\t"
+    : 
+    : 
+    : "edx"); 
+}
+template<>
+inline void do_n_rdseed<3>() {
+
+    asm volatile(
+    "rdseed %%edx\n\t"
+    "rdseed %%edx\n\t"
+    "rdseed %%edx\n\t"
+    : 
+    : 
+    : "edx"); 
+}
 
 #endif

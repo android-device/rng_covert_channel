@@ -7,7 +7,7 @@
 #	$(MAKE) -f Makefile_sender $@
 #	$(MAKE) -f Makefile_receiver $@
 
-CFLAGS=-std=c++11 -I /usr/local
+CFLAGS= -g -std=c++11 -I /usr/local
 CC=g++
 
 

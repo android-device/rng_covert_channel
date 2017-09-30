@@ -52,6 +52,11 @@ CYCLES measure_n_rdseed_time(unsigned int n)
     "mov %%eax, %%edi\n\t"
     "loop%=: \n\t"
     "try%=: rdseed %%edx\n\t"
+    "rdseed %%edx\n\t"
+    "rdseed %%edx\n\t"
+    "rdseed %%edx\n\t"
+    "rdseed %%edx\n\t"
+    "rdseed %%edx\n\t"
     "jnc try%=\n\t"
     "decl %%ecx\n\t"
     "jne loop%= \n\t"
@@ -86,21 +91,36 @@ uint32_t num_valid_rdseed()
 
 uint32_t test_n_rdseed(uint32_t n)
 {
-    uint32_t good = 1;
+    uint32_t contention;
+
+    if(n == 0) return 0;
+
     asm volatile(
-    "movl %1, %%eax\n\t"
-    "incl %%eax\n\t"
     "loop%=: \n\t"
-    "decl %%eax\n\t"
-    "je done%=\n\t"
     "rdseed %%edx\n\t"
-    "jc loop%=\n\t"
+    "jnc contention%=\n\t"
+    "decl %%eax\n\t"
+    "jne loop%=\n\t"
     "movl $0, %1\n\t"
+    "jmp done%=\n\t"
+    "contention%=:\n\t"
+    "movl $1, %1\n\t"
     "done%=:\n\t"
-    : "=a"(good) 
-    : "r"(n) 
+    : "=r"(contention) 
+    : "a"(n) 
     : "cc", "edx"); 
 
-    return good;
+    return contention;
 }
+
+void nops(uint32_t n)
+{
+    asm volatile(
+    "loop%=: \n\t"
+    "loop loop%=\n\t"
+    :  
+    : "c"(n) 
+    : ); 
+}
+
 
