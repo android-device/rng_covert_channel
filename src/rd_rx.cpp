@@ -24,7 +24,7 @@ int main(int argc, char **argv)
         double value = 0;
         double threshold_hi = 0.1;
         double threshold_lo = 0.01;
-        double bit_threshold = 10;
+        double bit_threshold = 80;
         int32_t state = 0;
         double value_prev = 0;
         int32_t deltas[SAMP_BUF_SZ];
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
 
                   if(iteration < 1000)
                   {
-                    bit_threshold = bit_threshold*(0.999)+iteration*(0.001);
+                    bit_threshold = bit_threshold*(0.9999)+iteration*(0.0001);
                     //printf("%f\n", bit_threshold);
                   }
                   shift_in( 
@@ -83,15 +83,18 @@ int main(int argc, char **argv)
                       bits,
                       SAMP_BUF_SZ);
                   if(search_packet(bits, PACKET_LEN, &packet))
-                    printf("FOUND_PACKET: %4.4x (%c)\n", packet, packet);
+                  {
+                    //printf("FOUND_PACKET: %4.4x (%c)\n", packet, packet);
+                    printf("%c",packet);
+                  }
 
                   iteration = 0;
                   state = 0;
                   //printf("1\n");
                 }
 
-                if(iteration < 2000)
-                  fprintf(stderr,"%f\n",value);
+                //if(iteration < 2000)
+                //  fprintf(stderr,"%f\n",value);
 
                 nops(DELAY);
 
@@ -140,9 +143,9 @@ bool search_packet(int32_t array[], int size, packet_t * packet)
   }
 
   //debug aray
-  for(int b=PACKET_LEN-1; b >= 0; b--)
-    printf("%1d",array[b]);
-  printf("\n");
+  //for(int b=PACKET_LEN-1; b >= 0; b--)
+  //  printf("%1d",array[b]);
+  //printf("\n");
 
   // grab data
   for(;i >= SUFFIX_LEN; i--)
