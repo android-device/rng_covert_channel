@@ -5,7 +5,7 @@
 #define TICK_LO 10000
 
 #define DELAY 200000
-#define LEN0 400
+#define LEN0 800
 #define LEN1 4000
 
 
