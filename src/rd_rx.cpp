@@ -93,8 +93,8 @@ int main(int argc, char **argv)
                   //printf("1\n");
                 }
 
-                //if(iteration < 2000)
-                //  fprintf(stderr,"%f\n",value);
+                if(iteration < 4000)
+                  fprintf(stderr,"%f\n",value);
 
                 nops(DELAY);
 
