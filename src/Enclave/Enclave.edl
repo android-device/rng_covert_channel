@@ -1,0 +1,17 @@
+enclave {
+    //from "Sealing/Sealing.edl" import *;
+
+    
+
+    trusted {
+        /* define ECALLs here. */
+        public int generate_random_number(void);
+	public void send_string([in, string]const char* str);
+	public void listener_thread(void);
+    };
+
+    untrusted {
+        /* define OCALLs here. */
+        void ocall_print([in, string]const char* str);
+    };
+};
