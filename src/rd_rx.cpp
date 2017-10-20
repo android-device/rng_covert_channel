@@ -11,100 +11,19 @@
 #define DATA_LEN 8
 #define PACKET_LEN (PREAMBLE_LEN+SUFFIX_LEN+DATA_LEN)
 #define PREAMBLE 0x2AA
-typedef uint8_t packet_t;
 
 void print_array(int32_t array[], int size);
 void shift_in(int32_t val, int32_t array[], int size);
 bool search_packet(int32_t array[], int size, packet_t * packet);
+double lpf(double v_old, double v_new, double weight);
+void* listener_thread(void* in);
 
 int main(int argc, char **argv)
 {
-	// Put your covert channel setup code here
-
-        double value = 0;
-        double threshold_hi = 0.1;
-        double threshold_lo = 0.01;
-        double bit_threshold = 80;
-        int32_t state = 0;
-        double value_prev = 0;
-        int32_t deltas[SAMP_BUF_SZ];
-        int32_t bits[SAMP_BUF_SZ];
-        int32_t iteration = 0;
-        int32_t delta = 0;
-        packet_t packet;
-
-        for (int i=0; i < SAMP_BUF_SZ; i++)
-        {
-          deltas[i] = 0;
-        }
-
-	//printf("Please press enter.\n");
-
-	char text_buf[2];
-	fgets(text_buf, sizeof(text_buf), stdin);
-
-	//printf("Receiver now listening.\n");
-
-	bool listening = true;
-	while (listening) {
-
-		// Put your covert channel code here
-
-                value = (1-FILTER)*value + (FILTER)*(test_n_rdseed(3));
-
-                //delta = iteration - deltas[0];
-                //if(delta < 0) delta += ITER_MAX;
-
-                if(state == 0 && value > threshold_hi)
-                {
-                  //shift_in(+iteration, deltas, SAMP_BUF_SZ);
-                  //print_array(deltas, SAMP_BUF_SZ);
-                  //printf("\n");
-                  //printf("+ %d\n", iteration);
-                  iteration = 0;
-                  state = 1;
-                  //printf("1\n");
-                }
-                else if(state == 1 && value < threshold_lo)
-                {
-                  shift_in(-iteration, deltas, SAMP_BUF_SZ);
-                  //print_array(deltas, SAMP_BUF_SZ);
-                  //printf("\n");
-                  //printf("%d\n", iteration);
-                  //printf("%d\n", (int)(iteration<bit_threshold));
-
-                  if(iteration < 1000)
-                  {
-                    bit_threshold = bit_threshold*(0.9999)+iteration*(0.0001);
-                    //printf("%f\n", bit_threshold);
-                  }
-                  shift_in( 
-                      (iteration < bit_threshold) ? 1 : 0,
-                      bits,
-                      SAMP_BUF_SZ);
-                  if(search_packet(bits, PACKET_LEN, &packet))
-                  {
-                    //printf("FOUND_PACKET: %4.4x (%c)\n", packet, packet);
-                    printf("%c",packet);
-                  }
-
-                  iteration = 0;
-                  state = 0;
-                  //printf("1\n");
-                }
-
-                if(iteration < 4000)
-                  fprintf(stderr,"%f\n",value);
-
-                nops(DELAY);
-
-                iteration++;
-                //if(iteration++ > ITER_MAX) iteration = 0;
-	}
-
-	printf("Receiver finished.\n");
-
-	return 0;
+  
+  listener_thread(NULL);
+  printf("Receiver finished.\n");
+  return 0;
 }
 
 void shift_in(int32_t val, int32_t array[], int size)
@@ -123,6 +42,7 @@ void print_array(int32_t array[], int size)
     printf("%.0d ", array[i]);
   }
 }
+
 
 bool search_packet(int32_t array[], int size, packet_t * packet)
 {
@@ -175,3 +95,106 @@ bool search_packet(int32_t array[], int size, packet_t * packet)
 
 
 
+
+void* listener_thread(void* in)
+{
+
+
+  // edge detection thresholds, with hysteresis
+  double threshold_hi = 0.1;  // low to high transition
+  double threshold_lo = 0.01; // high to low transistion
+
+  // bool, measured contention on the RDRAND HW
+  int contention = 0;
+  // filtered contention value
+  double contention_f = 0;
+  double contention_filter = FILTER;
+
+  // the current state in hysteresis, representing the last sampled edge
+  int32_t state = 0; //0-> last sampled falling edge
+
+  // pulse length threshold for determining a 1 or a 0
+  // tuned at runtime by finding pseudo average pulse width
+  double pw_thresh = 80;
+  double pw_thresh_filter = 0.0001; // pseudo average filter
+
+  // array of the last N pulse legths, in # of iterations
+  int32_t pulse_widths[SAMP_BUF_SZ]; // Number of iterations between falling edges
+
+  int32_t bits[SAMP_BUF_SZ];   // buffer of received bits
+  int32_t bit = 0;             // bit sample;
+  int32_t iteration = 0;       // Counter for loop iterations 
+
+  // container for received packet, if one is found.
+  packet_t packet;
+
+  // Initialize the buffer of pulse widths
+  for (int i=0; i < SAMP_BUF_SZ; i++)
+    pulse_widths[i] = 0;
+
+  bool listening = true;
+  while (listening) 
+  {
+    // sample contention and filter
+    contention = test_n_rdseed(3);
+    contention_f = lpf(contention_f, contention, contention_filter);
+
+    switch(state)
+    {
+      // in low state (last bit was 0, last transition was high to low
+      case 0:
+        // check for low to high transition
+        // if so, reset iteration count to measure pulse width
+        if(contention_f > threshold_hi)
+        {
+          iteration = 0;
+          state = 1;
+        }
+        break;
+
+      // in high state (last bit was 1, last transition was low to high
+      case 1:
+        // check for high to low transition, marking the end of a pulse.
+        // if so: measure pulse and associated bit, and reset to low state
+        if(contention_f < threshold_lo)
+        {
+          
+          // add pulse width to pulse_widths buffer
+          shift_in(-iteration, pulse_widths, SAMP_BUF_SZ);
+
+          // determine bit for associated pulse by comparing the measured
+          // width against the pw_thresh. Add it to bit buffer.
+          bit = (iteration<pw_thresh) ? 1:0;
+          shift_in(bit, bits, SAMP_BUF_SZ);
+
+          // search bit buffer for packets, and print them if found.
+          if(search_packet(bits, PACKET_LEN, &packet))
+          {
+            printf("%c",packet);
+          }
+
+          // fold this pulse width into the pulse width threshold, if it 
+          // wasn't too long.
+          if(iteration < 1000)
+            pw_thresh = lpf(pw_thresh, iteration, pw_thresh_filter);
+  
+          // reset iteration counter and go to low state
+          iteration = 0;
+          state = 0;
+        }
+        break;
+    }
+    
+    // wait until next iteration
+    nops(DELAY);
+    iteration++;
+  }
+            
+  return 0;
+}
+
+double lpf(double v_old, double v_new, double weight)
+{
+//  assert(w >= 0.0 && w <= 1.0); 
+  return v_old*(1.0-weight) + v_new*(weight);
+}

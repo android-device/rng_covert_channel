@@ -12,38 +12,48 @@
 
 void send_preamble();
 void send_byte(uint8_t byte);
+void send_packet(packet_t p);
 void tick();
 void test_timing();
 
 int main(int argc, char **argv)
 {
-	// Put your covert channel setup code here
+  // Put your covert channel setup code here
 
-	printf("Please type a message.\n");
+  printf("Please type a message.\n");
 
-	bool sending = true;
-	while (sending) {
-		char text_buf[128];
-		fgets(text_buf, sizeof(text_buf), stdin);
-	
-                for(int c=0; c < 128; c++)
-                {
-                  if(text_buf[c] == '\0')
-                    break;
-                  //test_timing();
-                  send_preamble();
-                  send_byte(text_buf[c]);
-                  send_byte(0xCC);
-                  //for(int i=0; i < DELAY; i++)
-                  //{
-                  //  measure_n_rdseed_time(8); 
-                  //}
-                }
-	}
+  bool sending = true;
+  while (sending) {
+    char text_buf[128];
+    fgets(text_buf, sizeof(text_buf), stdin);
+  
+      for(int c=0; c < 128; c++)
+      {
+        if(text_buf[c] == '\0')
+          break;
+        send_packet(text_buf[c]);
+        //test_timing();
+        //send_preamble();
+        //send_byte(text_buf[c]);
+        //send_byte(0xCC);
+        //for(int i=0; i < DELAY; i++)
+        //{
+        //  measure_n_rdseed_time(8); 
+        //}
+      }
+  }
 
-	printf("Sender finished.\n");
+  printf("Sender finished.\n");
 
-	return 0;
+  return 0;
+}
+
+
+void send_packet(packet_t p)
+{
+  send_preamble();
+  send_byte(p);
+  send_byte(0xCC);
 }
 
 

@@ -17,6 +17,7 @@
 #define ADDR_PTR uint64_t 
 #define CYCLES uint32_t
 
+typedef uint8_t packet_t;
 CYCLES measure_one_block_access_time(ADDR_PTR addr);
 CYCLES measure_one_rdseed_time();
 CYCLES measure_n_rdseed_time(unsigned int n);
