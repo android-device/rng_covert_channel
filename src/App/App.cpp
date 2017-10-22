@@ -55,9 +55,15 @@ int main(int argc, char const *argv[]) {
     pthread_status[0] = pthread_create(&threads[0], NULL, spawn_listener_thread, &pthread_args[0]);
     std::cout << "asynchronous call" << std::endl;
 
-    std::cout << "starting listener_thread" << std::endl;
-    pthread_status[1] = pthread_create(&threads[0], NULL, spawn_listener_thread, &pthread_args[0]);
-    std::cout << "asynchronous call" << std::endl;
+    /* std::cout << "starting listener_thread" << std::endl; */
+    /* pthread_status[1] = pthread_create(&threads[0], NULL, spawn_listener_thread, &pthread_args[0]); */
+    /* std::cout << "asynchronous call" << std::endl; */
+    while (1) {
+        char text_buf[128];
+        fgets(text_buf, sizeof(text_buf), stdin);
+
+        send_string(global_eid, text_buf);
+    }
 
     /* both workers are blocking calls, should continue until kill signal is received. */
     while (true) {} ;
