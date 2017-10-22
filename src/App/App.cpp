@@ -4,6 +4,7 @@
 #include "Enclave_u.h"
 #include "sgx_urts.h"
 #include "sgx_utils/sgx_utils.h"
+#include <pthread.h>
 
 void print_usage(const char* name);
 
@@ -22,9 +23,10 @@ int main(int argc, char const *argv[]) {
         return 1;
     }
 
-    /* spawn listener thread */
+    pthread_t threads[2];
+
     std::cout << "starting listener_thread" << std::endl;
-    sgx_status_t status = listener_thread(global_eid);
+    pthread_create(&threads[0], NULL, spawn_listener_thread, NULL);
     std::cout << "asynchronous call" << std::endl;
     if (status != SGX_SUCCESS)
     {
@@ -49,3 +51,8 @@ void print_usage(const char* name)
     printf("Usage: %s (rx|tx)\n", name);
 }
 
+void* spawn_listener_thread()
+{
+    /* blocking call, does not return... */
+    sgx_status_t status = listener_thread(global_eid);
+}
