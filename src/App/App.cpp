@@ -8,7 +8,7 @@
 
 void print_usage(const char* name);
 
-void* spawn_listener_thread()
+void spawn_listener_thread()
 {
     /* blocking call, does not return... */
     sgx_status_t status = listener_thread(global_eid);
