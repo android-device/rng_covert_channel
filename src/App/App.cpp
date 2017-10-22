@@ -6,7 +6,7 @@
 #include "sgx_utils/sgx_utils.h"
 
 volatile bool sending;
-volatile bool sending;
+volatile bool receiving;
 
 void print_usage(const char* name);
 
