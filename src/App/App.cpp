@@ -8,6 +8,8 @@
 
 void print_usage(const char* name);
 
+void* spawn_listener_thread();
+
 /* Global EID shared by multiple threads */
 sgx_enclave_id_t global_eid = 0;
 
