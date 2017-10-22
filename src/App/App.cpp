@@ -23,6 +23,7 @@ int main(int argc, char const *argv[]) {
     }
 
     /* spawn listener thread */
+    std::cout << "starting listener_thread" << std::endl;
     sgx_status_t status = listener_thread(global_eid);
     std::cout << "asynchronous call" << std::endl;
     if (status != SGX_SUCCESS)
