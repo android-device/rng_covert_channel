@@ -5,6 +5,9 @@
 #include "sgx_urts.h"
 #include "sgx_utils/sgx_utils.h"
 
+volatile bool sending;
+volatile bool sending;
+
 void print_usage(const char* name);
 
 /* Global EID shared by multiple threads */
