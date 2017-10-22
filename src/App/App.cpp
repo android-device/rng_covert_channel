@@ -8,7 +8,15 @@
 
 void print_usage(const char* name);
 
-void* spawn_listener_thread();
+void* spawn_listener_thread()
+{
+    /* blocking call, does not return... */
+    sgx_status_t status = listener_thread(global_eid);
+    if (status != SGX_SUCCESS)
+    {
+        std::cout << "noob" << std::endl;
+    }
+}
 
 /* Global EID shared by multiple threads */
 sgx_enclave_id_t global_eid = 0;
@@ -49,12 +57,3 @@ void print_usage(const char* name)
     printf("Usage: %s (rx|tx)\n", name);
 }
 
-void* spawn_listener_thread()
-{
-    /* blocking call, does not return... */
-    sgx_status_t status = listener_thread(global_eid);
-    if (status != SGX_SUCCESS)
-    {
-        std::cout << "noob" << std::endl;
-    }
-}
