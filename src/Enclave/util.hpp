@@ -87,11 +87,11 @@ inline void do_n_rdseed<3>() {
 
 /* flag, which indicates that a preamble has been seen and a message is being
  * received. The sender should not send anything until this flag is cleared */
-volatile bool receiving;
+extern volatile bool receiving;
 
 /* flag, which indicates that a message is being sent. The listener should
  * ignore all messages until this flag is cleared. */
-volatile bool sending;
+extern volatile bool sending;
 
 
 #endif

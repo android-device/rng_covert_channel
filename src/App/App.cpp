@@ -10,14 +10,6 @@ void print_usage(const char* name);
 /* Global EID shared by multiple threads */
 sgx_enclave_id_t global_eid = 0;
 
-/* flag, which indicates that a preamble has been seen and a message is being
- * received. The sender should not send anything until this flag is cleared */
-volatile bool receiving;
-
-/* flag, which indicates that a message is being sent. The listener should
- * ignore all messages until this flag is cleared. */
-volatile bool sending;
-
 // OCall implementations
 void ocall_print(const char* str) {
     printf("%s", str);
