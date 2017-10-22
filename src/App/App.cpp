@@ -21,6 +21,17 @@ void* spawn_listener_thread(void* arguments)
     }
 }
 
+void* message_send_thread(void* arguments)
+{
+    /* process sending of inputs */
+    while (1) {
+        char text_buf[128];
+        fgets(text_buf, sizeof(text_buf), stdin);
+
+        send_string(global_eid, text_buf);
+    }
+}
+
 // OCall implementations
 void ocall_print(const char* str) {
     printf("%s", str);
@@ -35,23 +46,22 @@ int main(int argc, char const *argv[]) {
 
     pthread_t threads[2];
     int pthread_args[2];
+    int pthread_status[2];
+
     pthread_args[0] = 0;
     pthread_args[1] = 0;
 
     std::cout << "starting listener_thread" << std::endl;
-    pthread_create(&threads[0], NULL, spawn_listener_thread, &pthread_args[0]);
+    pthread_status[0] = pthread_create(&threads[0], NULL, spawn_listener_thread, &pthread_args[0]);
     std::cout << "asynchronous call" << std::endl;
 
-    /* process sending of inputs */
-    while (1) {
-        char text_buf[128];
-        fgets(text_buf, sizeof(text_buf), stdin);
+    std::cout << "starting listener_thread" << std::endl;
+    pthread_status[1] = pthread_create(&threads[0], NULL, spawn_listener_thread, &pthread_args[0]);
+    std::cout << "asynchronous call" << std::endl;
 
-        send_string(global_eid, text_buf);
-    }
+    /* both workers are blocking calls, should continue until kill signal is received. */
+    while (true) {} ;
 
-    // otherwise, print usage
-    print_usage(argv[0]);
     return 0;
 }
 
