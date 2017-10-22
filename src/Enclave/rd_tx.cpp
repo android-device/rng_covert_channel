@@ -19,13 +19,13 @@ void test_timing();
  * messages should be ignored
  *
  * It is only ever set locally */
-volatile bool sending;
+/* volatile bool sending; */
 
 /* receiving flag indicates  that a message is being received and all send
  * requests should be delayed until sending has completed.
  *
  * It only ever set externally */
-volatile bool receiving;
+/* volatile bool receiving; */
 
 void send_string(const char* str)
 {
