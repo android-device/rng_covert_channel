@@ -18,14 +18,14 @@ void test_timing();
 /* sending flag indicates  that a message is being sent and all received
  * messages should be ignored
  *
- * Not volatile because it is only ever set locally */
-extern bool sending;
+ * It is only ever set locally */
+volatile bool sending;
 
 /* receiving flag indicates  that a message is being received and all send
  * requests should be delayed until sending has completed.
  *
- * Volatile because it is only ever set externally */
-extern volatile bool receiving;
+ * It only ever set externally */
+volatile bool receiving;
 
 void send_string(const char* str)
 {

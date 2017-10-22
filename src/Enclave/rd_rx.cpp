@@ -19,13 +19,13 @@ double lpf(double v_old, double v_new, double weight);
 /* sending flag indicates  that a message is being sent and all received
  * messages should be ignored
  *
- * Volatile because it is only ever set externally */
+ * It is only ever set externally */
 volatile bool sending;
 
 /* receiving flag indicates  that a message is being received and all send
  * requests should be delayed until sending has completed.
  *
- * Not volatile because it is only ever set locally */
+ * It is only ever set locally */
 volatile bool receiving;
 
 void shift_in(int32_t val, int32_t array[], int size)
