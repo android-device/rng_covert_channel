@@ -10,46 +10,40 @@ void print_usage(const char* name);
 /* Global EID shared by multiple threads */
 sgx_enclave_id_t global_eid = 0;
 
+/* flag, which indicates that a preamble has been seen and a message is being
+ * received. The sender should not send anything until this flag is cleared */
+volatile bool receiving;
+
+/* flag, which indicates that a message is being sent. The listener should
+ * ignore all messages until this flag is cleared. */
+volatile bool sending;
+
 // OCall implementations
 void ocall_print(const char* str) {
     printf("%s", str);
 }
 
 int main(int argc, char const *argv[]) {
-    if( argc < 2)
-    {
-        print_usage(argv[0]);
-        return 0;
-    }
-
     // Get Enclave
     if (initialize_enclave(&global_eid, "enclave.token", "enclave.signed.so") < 0) {
         std::cout << "Fail to initialize enclave." << std::endl;
         return 1;
     }
 
-    // enter RX mode if "rx" is first arg
-    if( std::string(argv[1]) == "rx")
+    /* spawn listener thread */
+    sgx_status_t status = listener_thread(global_eid);
+    std::cout << "asynchronous call" << std::endl;
+    if (status != SGX_SUCCESS)
     {
-      std::cout << "Entering rx mode: " << std::endl;
-      sgx_status_t status = listener_thread(global_eid);
-      if (status != SGX_SUCCESS) 
-      {
         std::cout << "noob" << std::endl;
-      }
-      return 0;
     }
 
-    // enter TX mode if "tx" is first arg
-    if( std::string(argv[1]) == "tx")
-    {
-      std::cout << "Entering tx mode. Type your messages and press ENTER to send." << std::endl;
-      while (1) {
+    /* process sending of inputs */
+    while (1) {
         char text_buf[128];
         fgets(text_buf, sizeof(text_buf), stdin);
+
         send_string(global_eid, text_buf);
-      }
-      return 0;
     }
 
     // otherwise, print usage

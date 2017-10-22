@@ -15,90 +15,106 @@ void send_byte(uint8_t byte);
 void tick();
 void test_timing();
 
-void send_string(const char* str)
+/* sending flag indicates  that a message is being sent and all received
+ * messages should be ignored
+ *
+ * Not volatile because it is only ever set locally */
+extern bool sending;
+
+/* receiving flag indicates  that a message is being received and all send
+ * requests should be delayed until sending has completed.
+ *
+ * Volatile because it is only ever set externally */
+extern volatile bool receiving;
+
+oid send_string(const char* str)
 {
-  for(int i=0; str[i] != NULL; i++)
-  {
-    send_packet(str[i]);
-  }
+    /* spin until any messages being received are completely received. */
+    while(receiving) {};
+    sending = true;
+    for(int i=0; str[i] != NULL; i++)
+    {
+        send_packet(str[i]);
+    }
+    sending = false;
 }
 
 void send_packet(packet_t p)
 {
-  send_preamble();
-  send_byte(p);
-  send_byte(0xCC);
+    send_preamble();
+    send_byte(p);
+    send_byte(0xCC);
 }
 
 
 void tick()
 {
-  nops(DELAY);
+    nops(DELAY);
 }
 
 void send_preamble()
 {
-  int preamble_len = 10;
+    int preamble_len = 10;
 
-  for(int i=0; i < preamble_len; i++)
-  {
-    if(i%2)
-      do_n_rdseed<LEN0>();
-      //measure_n_rdseed_time(LEN0);
-    else
-      do_n_rdseed<LEN1>();
-      //measure_n_rdseed_time(LEN1);
-    tick();
-  }
+    for(int i=0; i < preamble_len; i++)
+    {
+        if(i%2)
+            do_n_rdseed<LEN0>();
+        //measure_n_rdseed_time(LEN0);
+        else
+            do_n_rdseed<LEN1>();
+        //measure_n_rdseed_time(LEN1);
+        tick();
+    }
 }
 
 void send_byte(uint8_t byte)
 {
-  uint8_t pairity = 0;
+    uint8_t pairity = 0;
 
-  for(int i=0; i < 8; i++)
-  {
-    pairity ^= (byte&0x80)>>7;
-    if(byte & 0x80)
-      //measure_n_rdseed_time(LEN0);
-      do_n_rdseed<LEN0>();
+    for(int i=0; i < 8; i++)
+    {
+        pairity ^= (byte&0x80)>>7;
+        if(byte & 0x80)
+            //measure_n_rdseed_time(LEN0);
+            do_n_rdseed<LEN0>();
+        else
+            //measure_n_rdseed_time(LEN1);
+            do_n_rdseed<LEN1>();
+        byte = byte<<1;
+        tick();
+    }
+
+    if(pairity == 0x01)
+    {
+        do_n_rdseed<LEN0>();
+    }
     else
-      //measure_n_rdseed_time(LEN1);
-      do_n_rdseed<LEN1>();
-    byte = byte<<1;
+    {
+        do_n_rdseed<LEN1>();
+    }
     tick();
-  }
-
-  if(pairity == 0x01)
-  {
-    do_n_rdseed<LEN0>();
-  }
-  else
-  {
-    do_n_rdseed<LEN1>();
-  }
-  tick();
-  tick();
-  tick();
+    tick();
+    tick();
 }
 
 
 /*
-void test_timing()
-{
-  int iterations = 0;
-  while(1)
-  {
-    printf("Set iteration value: ");
-    scanf("%d",&iterations);
-    printf("\n");
+   void test_timing()
+   {
+   int iterations = 0;
+   while(1)
+   {
+   printf("Set iteration value: ");
+   scanf("%d",&iterations);
+   printf("\n");
 
-    measure_n_rdseed_time(iterations);
-    printf("Did %d rdseeds.\n", iterations);
-  }
+   measure_n_rdseed_time(iterations);
+   printf("Did %d rdseeds.\n", iterations);
+   }
 
-}
-*/
+   }
+   */
 
 
 
