@@ -11,7 +11,7 @@ void print_usage(const char* name);
 /* Global EID shared by multiple threads */
 sgx_enclave_id_t global_eid = 0;
 
-void spawn_listener_thread()
+void* spawn_listener_thread()
 {
     /* blocking call, does not return... */
     sgx_status_t status = listener_thread(global_eid);
@@ -34,9 +34,12 @@ int main(int argc, char const *argv[]) {
     }
 
     pthread_t threads[2];
+    int pthread_args[2];
+    pthread_args[0] = 0;
+    pthread_args[1] = 0;
 
     std::cout << "starting listener_thread" << std::endl;
-    pthread_create(&threads[0], NULL, spawn_listener_thread, NULL);
+    pthread_create(&threads[0], NULL, spawn_listener_thread, &pthread_args[0]);
     std::cout << "asynchronous call" << std::endl;
 
     /* process sending of inputs */
