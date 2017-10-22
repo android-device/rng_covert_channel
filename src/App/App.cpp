@@ -30,10 +30,6 @@ int main(int argc, char const *argv[]) {
     std::cout << "starting listener_thread" << std::endl;
     pthread_create(&threads[0], NULL, spawn_listener_thread, NULL);
     std::cout << "asynchronous call" << std::endl;
-    if (status != SGX_SUCCESS)
-    {
-        std::cout << "noob" << std::endl;
-    }
 
     /* process sending of inputs */
     while (1) {
@@ -57,4 +53,8 @@ void* spawn_listener_thread()
 {
     /* blocking call, does not return... */
     sgx_status_t status = listener_thread(global_eid);
+    if (status != SGX_SUCCESS)
+    {
+        std::cout << "noob" << std::endl;
+    }
 }
