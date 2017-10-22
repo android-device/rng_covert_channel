@@ -27,7 +27,7 @@ extern bool sending;
  * Volatile because it is only ever set externally */
 extern volatile bool receiving;
 
-oid send_string(const char* str)
+void send_string(const char* str)
 {
     /* spin until any messages being received are completely received. */
     while(receiving) {};
