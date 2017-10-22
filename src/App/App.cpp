@@ -8,6 +8,9 @@
 
 void print_usage(const char* name);
 
+/* Global EID shared by multiple threads */
+sgx_enclave_id_t global_eid = 0;
+
 void spawn_listener_thread()
 {
     /* blocking call, does not return... */
@@ -17,9 +20,6 @@ void spawn_listener_thread()
         std::cout << "noob" << std::endl;
     }
 }
-
-/* Global EID shared by multiple threads */
-sgx_enclave_id_t global_eid = 0;
 
 // OCall implementations
 void ocall_print(const char* str) {
