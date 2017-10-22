@@ -26,7 +26,7 @@ volatile bool sending;
  * requests should be delayed until sending has completed.
  *
  * Not volatile because it is only ever set locally */
-bool receiving;
+volatile bool receiving;
 
 void shift_in(int32_t val, int32_t array[], int size)
 {
