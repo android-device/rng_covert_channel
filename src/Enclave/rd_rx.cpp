@@ -91,7 +91,7 @@ bool search_packet(int32_t array[], int size, packet_t * packet)
 
 
 
-void* listener_thread()
+void listener_thread()
 {
 
 
