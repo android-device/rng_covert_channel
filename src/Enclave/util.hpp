@@ -1,10 +1,10 @@
 
 // You may only use fgets() to pull input from stdin
-// You may use any print function to stdout to print 
+// You may use any print function to stdout to print
 // out chat messages
 #include <stdio.h>
 
-// You may use memory allocators and helper functions 
+// You may use memory allocators and helper functions
 // (e.g., rand()).  You may not use system().
 #include <stdlib.h>
 
@@ -16,7 +16,7 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
-#define ADDR_PTR uint64_t 
+#define ADDR_PTR uint64_t
 #define CYCLES uint32_t
 
 typedef uint8_t packet_t;
@@ -42,9 +42,9 @@ void do_n_rdseed() {
     "rdseed %%edx\n\t"
     "rdseed %%edx\n\t"
     "rdseed %%edx\n\t"
-    : 
-    : 
-    : "edx"); 
+    :
+    :
+    : "edx");
     do_n_rdseed<(count - 4)/2>();
     do_n_rdseed<(count-4) - ((count - 4)/2)>();
 }
@@ -58,9 +58,9 @@ inline void do_n_rdseed<1>() {
 
     asm volatile(
     "rdseed %%edx\n\t"
-    : 
-    : 
-    : "edx"); 
+    :
+    :
+    : "edx");
 
 }
 template<>
@@ -69,9 +69,9 @@ inline void do_n_rdseed<2>() {
     asm volatile(
     "rdseed %%edx\n\t"
     "rdseed %%edx\n\t"
-    : 
-    : 
-    : "edx"); 
+    :
+    :
+    : "edx");
 }
 template<>
 inline void do_n_rdseed<3>() {
@@ -80,9 +80,18 @@ inline void do_n_rdseed<3>() {
     "rdseed %%edx\n\t"
     "rdseed %%edx\n\t"
     "rdseed %%edx\n\t"
-    : 
-    : 
-    : "edx"); 
+    :
+    :
+    : "edx");
 }
+
+/* flag, which indicates that a preamble has been seen and a message is being
+ * received. The sender should not send anything until this flag is cleared */
+volatile bool receiving;
+
+/* flag, which indicates that a message is being sent. The listener should
+ * ignore all messages until this flag is cleared. */
+volatile bool sending;
+
 
 #endif
