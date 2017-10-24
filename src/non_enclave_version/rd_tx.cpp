@@ -10,6 +10,7 @@
 
 void send_preamble();
 void send_byte(uint8_t byte);
+void send_packet(packet_t p);
 void tick();
 void test_timing();
 
