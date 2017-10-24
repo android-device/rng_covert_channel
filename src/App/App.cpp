@@ -47,7 +47,7 @@ int main(int argc, char const *argv[]) {
     printf("Press enter after starting the other process, in order to begin tuning.");
     for(int i=0; i<20; i++)
     {
-        send_string(global_eid, text_buf);
+        send_string(global_eid, "Welcome");
         nops(DELAY);
     }
 
