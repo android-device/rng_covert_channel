@@ -6,6 +6,8 @@
 #include "sgx_utils/sgx_utils.h"
 #include <pthread.h>
 
+#define DELAY 1000
+
 void print_usage(const char* name);
 
 /* Global EID shared by multiple threads */
@@ -24,6 +26,16 @@ void* spawn_listener_thread(void* arguments)
 // OCall implementations
 void ocall_print(const char* str) {
     printf("%s", str);
+}
+
+void nops(uint32_t n)
+{
+    asm volatile(
+    "loop%=: \n\t"
+    "loop loop%=\n\t"
+    :
+    : "c"(n)
+    : );
 }
 
 int main(int argc, char const *argv[]) {
