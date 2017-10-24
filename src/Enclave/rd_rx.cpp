@@ -111,7 +111,7 @@ void listener_thread()
 
     // pulse length threshold for determining a 1 or a 0
     // tuned at runtime by finding pseudo average pulse width
-    double pw_thresh = 80;
+    double pw_thresh = 314;
     double pw_thresh_filter = 0.0001; // pseudo average filter
 
     // array of the last N pulse legths, in # of iterations
