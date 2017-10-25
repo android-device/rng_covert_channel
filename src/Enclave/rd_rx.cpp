@@ -175,9 +175,9 @@ void listener_thread()
                         /* drop package if a message is currently being sent */
                         if(!sending) {
                             /* if end of message */
-                            if(buf == '\n')
+                            if(buf[0] == '\n')
                             {
-                                msg[msgIndex++] = (char)buf;
+                                msg[msgIndex++] = buf[0];
                                 receiving = false;
                                 ocall_print(msg);
                                 for(int i=1; i< msgIndex; i++)
@@ -188,7 +188,7 @@ void listener_thread()
                             }
                             else
                             {
-                                msg[msgIndex++] = (char)buf;
+                                msg[msgIndex++] = buf[0];
                             }
                         }
                     }
