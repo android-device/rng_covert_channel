@@ -56,7 +56,7 @@ int main(int argc, char const *argv[]) {
     pthread_status[0] = pthread_create(&threads[0], NULL, spawn_listener_thread, &pthread_args[0]);
     std::cout << "asynchronous call" << std::endl;
 
-    printf("Press enter after starting the other process, in order to begin tuning.");
+    printf("Press enter after starting the other process, in order to begin tuning.\n");
     fgets(text_buf, sizeof(text_buf), stdin);
     for(int i=0; i<20; i++)
     {
