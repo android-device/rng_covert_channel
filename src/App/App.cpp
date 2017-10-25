@@ -5,6 +5,7 @@
 #include "sgx_urts.h"
 #include "sgx_utils/sgx_utils.h"
 #include <pthread.h>
+#include <time.h>
 
 #define DELAY 1000
 
@@ -40,6 +41,12 @@ void nops(uint32_t n)
 }
 
 int main(int argc, char const *argv[]) {
+    bool measure_time = false;
+    clock_t t;
+    
+    if(argc >= 2 && strcmp(argv[1], "-t") == 0)
+        measure_time = true;
+
     // Get Enclave
     if (initialize_enclave(&global_eid, "enclave.token", "enclave.signed.so") < 0) {
         std::cout << "Fail to initialize enclave." << std::endl;
@@ -68,7 +75,14 @@ int main(int argc, char const *argv[]) {
         char text_buf[128];
         fgets(text_buf, sizeof(text_buf), stdin);
 
+        t = clock();
         send_string(global_eid, text_buf);
+        t = clock() - t;
+        if(measure_time)
+        {
+             printf("Transfer Rate: %f B/s\n", (float)strlen(text_buf)/(((float)t)/CLOCKS_PER_SEC));
+        }
+        
     }
 
     /* both workers are blocking calls, should continue until kill signal is received. */
