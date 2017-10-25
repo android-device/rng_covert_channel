@@ -174,11 +174,9 @@ void listener_thread()
 
                         /* drop package if a message is currently being sent */
                         if(!sending) {
-                            printf("receiving");
                             /* if end of message */
                             if(buf[0] == '\n')
                             {
-                                printf("newline!");
                                 msg[msgIndex++] = buf[0];
                                 receiving = false;
                                 ocall_print(msg);
@@ -188,7 +186,6 @@ void listener_thread()
                             }
                             else
                             {
-                                printf("not newline");
                                 msg[msgIndex++] = buf[0];
                             }
                         }
