@@ -128,7 +128,6 @@ void listener_thread()
     for (int i=0; i < SAMP_BUF_SZ; i++)
         pulse_widths[i] = 0;
 
-    bool listening = true;
     while (listening)
     {
         // sample contention and filter
@@ -183,7 +182,6 @@ void listener_thread()
 
                     // reset iteration counter and go to low state
                     iteration = 0;
-                    receiving = false;
                     state = 0;
                 }
                 break;
