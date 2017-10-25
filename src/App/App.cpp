@@ -24,9 +24,17 @@ void* spawn_listener_thread(void* arguments)
     }
 }
 
+static char input[128];
+static int currIndex;
+
 // OCall implementations
 void ocall_print(const char* str) {
-    printf("%s", str);
+    input[currIndex++] = str;
+    if(input[currIndex] == '\n')
+    {
+        printf("%s", str);
+        currIndex = 0;
+    }
 }
 
 void nops(uint32_t n)
@@ -58,6 +66,8 @@ int main(int argc, char const *argv[]) {
 
     pthread_args[0] = 0;
     pthread_args[1] = 0;
+
+    currIndex = 0;
 
     std::cout << "starting listener_thread" << std::endl;
     pthread_status[0] = pthread_create(&threads[0], NULL, spawn_listener_thread, &pthread_args[0]);
