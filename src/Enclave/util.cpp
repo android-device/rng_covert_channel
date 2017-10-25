@@ -1,5 +1,9 @@
 
 #include "util.hpp"
+#include <sgx_tcrypto.h>
+
+sgx_aes_ctr_128bit_key_t message_key = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+uint32_t use_encryption = 0;
 
 /* Measure the time it takes to access a block with virtual address addr. */
 CYCLES measure_one_block_access_time(ADDR_PTR addr)
@@ -123,4 +127,17 @@ void nops(uint32_t n)
     : ); 
 }
 
+void set_key(const uint8_t * key)
+{
+    for(int i=0; i < 16; i++)
+        message_key[i] = key[i];
+}
+
+void set_encryption(uint32_t v)
+{
+    if(v == 1)
+        use_encryption = 1;
+    else
+        use_encryption = 0;
+}
 

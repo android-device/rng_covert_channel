@@ -3,6 +3,7 @@
 // You may use any print function to stdout to print
 // out chat messages
 #include <stdio.h>
+#include <sgx_tcrypto.h>
 
 // You may use memory allocators and helper functions
 // (e.g., rand()).  You may not use system().
@@ -18,6 +19,9 @@
 
 #define ADDR_PTR uint64_t
 #define CYCLES uint32_t
+
+extern sgx_aes_ctr_128bit_key_t message_key;
+extern uint32_t use_encryption;
 
 typedef uint8_t packet_t;
 CYCLES measure_one_block_access_time(ADDR_PTR addr);
