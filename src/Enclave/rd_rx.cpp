@@ -12,6 +12,8 @@
 #define PACKET_LEN (PREAMBLE_LEN+SUFFIX_LEN+DATA_LEN)
 #define PREAMBLE 0x2AA
 
+#include <cstring>
+
 void shift_in(int32_t val, int32_t array[], int size);
 bool search_packet(int32_t array[], int size, packet_t * packet);
 double lpf(double v_old, double v_new, double weight);
@@ -128,7 +130,7 @@ void listener_thread()
     for (int i=0; i < SAMP_BUF_SZ; i++)
         pulse_widths[i] = 0;
 
-    char* msg = new char[1];
+    char* msg = new char[1000];
     int msgIndex = 0;
     bool listening = true;
     while (listening)
@@ -175,19 +177,28 @@ void listener_thread()
                         /* drop package if a message is currently being sent */
                         if(!sending) {
                             /* if end of message */
-                            if(buf[0] == '\n')
+			    msg[msgIndex++] = buf[0];
+			    if(msgIndex >= 2 && msg[msgIndex-2] == 'd' &&
+                                             //   msg[msgIndex-3] == 'o' &&
+                                             //   msg[msgIndex-2] == 'n' &&
+                                                msg[msgIndex-1] == 'e')
+                            //if(msgIndex >= 4 && strncmp(msg-msgIndex-4, "done", 4) == 0)
+			    //if(msgIndex >= 4 && msg[msgIndex-4] == 'd')
+                            //if(buf[0] == '\n')
                             {
-                                msg[msgIndex++] = buf[0];
-                                receiving = false;
+                             //   msg[msgIndex++] = buf[0];
+				msg[msgIndex++] = 0;
                                 ocall_print(msg);
-                                delete [] msg;
+				for(int i=0; i < 1000; i++)
+				    msg[i] = 0;
+                                //delete [] msg;
                                 msgIndex = 0;
-                                msg = new char;
+                                //msg = new char;
                             }
-                            else
-                            {
-                                msg[msgIndex++] = buf[0];
-                            }
+                            //else
+                            //{
+                            //    msg[msgIndex++] = buf[0];
+                            //}
                         }
                     }
 
@@ -197,6 +208,7 @@ void listener_thread()
                         pw_thresh = lpf(pw_thresh, iteration, pw_thresh_filter);
 
                     // reset iteration counter and go to low state
+		    receiving = false;
                     iteration = 0;
                     state = 0;
                 }
