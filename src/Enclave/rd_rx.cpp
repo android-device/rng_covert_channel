@@ -1,4 +1,4 @@
-
+#include <iostream>
 #include"util.hpp"
 #define DELAY 1000
 #define SAMP_BUF_SZ 30
