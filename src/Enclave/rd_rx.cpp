@@ -177,7 +177,7 @@ void listener_thread()
                             /* if end of message */
                             if(buf == '\n')
                             {
-                                msg[msgIndex++] = buf;
+                                msg[msgIndex++] = (char)buf;
                                 receiving = false;
                                 ocall_print(msg);
                                 for(int i=1; i< msgIndex; i++)
@@ -188,7 +188,7 @@ void listener_thread()
                             }
                             else
                             {
-                                msg[msgIndex++] = buf;
+                                msg[msgIndex++] = (char)buf;
                             }
                         }
                     }
