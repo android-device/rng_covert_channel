@@ -65,7 +65,7 @@ int main(int argc, char const *argv[]) {
 
     printf("Press enter after starting the other process, in order to begin tuning.");
     char text_buf[128];
-    fgets(text_buf, sizeof(text_buf), stdin);
+    fgets(NULL, sizeof(text_buf), stdin);
 
     for(int i=0; i<20; i++)
     {
