@@ -171,7 +171,22 @@ void listener_thread()
 
                         /* drop package if a message is currently being sent */
                         if(!sending) {
-                            ocall_print(buf);
+                            /* if end of message */
+                            if(buf == '\n')
+                            {
+                                msg[msgIndex++] = buf;
+                                receiving = false;
+                                ocall_print(msg,msgIndex);
+                                for(int i=1; i< msgIndex; i++)
+                                {
+                                    delete msg[i];
+                                }
+                                msgIndex = 0;
+                            }
+                            else
+                            {
+                                msg[msgIndex++] = buf;
+                            }
                         }
                     }
 
