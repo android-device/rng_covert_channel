@@ -7,7 +7,8 @@
 #define DELAY 200000
 #define LEN0 800
 #define LEN1 4000
-
+#include <cstring>
+#include <sgx_tcrypto.h>
 
 
 void send_preamble();
@@ -29,14 +30,47 @@ void test_timing();
 
 void send_string(const char* str)
 {
-    /* spin until any messages being received are completely received. */
-    while(receiving) {};
-    sending = true;
-    for(int i=0; str[i] != NULL; i++)
+    
+    if(use_encryption == 1)
     {
-        send_packet(str[i]);
-    }
-    sending = false;
+		uint8_t counter = 0;
+		uint32_t len = strlen(str);
+		uint32_t blocks = (len+15)/16;
+		uint8_t * buf = (uint8_t*)malloc(16*blocks);
+
+		strncpy((char*)buf, str, blocks*16);
+
+		sgx_aes_ctr_encrypt(&message_key, buf, blocks*16, &counter, 8, buf);
+
+		/* spin until any messages being received are completely received. */
+		while(receiving) {};
+		sending = true;
+		for(int i=0; i < blocks*16; i++)
+			send_packet(buf[i]);
+		//for(int i=0; str[i] != NULL; i++)
+		//{
+			//send_packet(str[i]);
+		//}
+		send_packet('d');
+		send_packet('o');
+		send_packet('n');
+		send_packet('e');
+		sending = false;
+		return;
+	}
+	else
+	{
+		/* spin until any messages being received are completely received. */
+		while(receiving) {};
+		sending = true;
+		for(int i=0; str[i] != NULL; i++)
+		{
+		    send_packet(str[i]);
+		}
+		sending = false;
+		return;
+	}
+		
 }
 
 void send_packet(packet_t p)

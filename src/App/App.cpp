@@ -43,14 +43,24 @@ int main(int argc, char const *argv[]) {
     bool measure_time = false;
     clock_t t;
     
-    if(argc >= 2 && strcmp(argv[1], "-t") == 0)
-        measure_time = true;
-
     // Get Enclave
     if (initialize_enclave(&global_eid, "enclave.token", "enclave.signed.so") < 0) {
         std::cout << "Fail to initialize enclave." << std::endl;
         return 1;
     }
+
+    if(argc >= 2 && strcmp(argv[1], "-t") == 0)
+        measure_time = true;
+
+    if(argc >= 2 && strcmp(argv[1], "-k") == 0)
+    {
+	uint8_t key[16];
+        strncpy((char*)key, argv[2], 16);
+        set_key(global_eid, key);
+	set_encryption(global_eid, 1);
+    }
+        
+
 
     pthread_t threads[2];
     int pthread_args[2];
