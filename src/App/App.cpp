@@ -77,8 +77,8 @@ int main(int argc, char const *argv[]) {
     fgets(text_buf, sizeof(text_buf), stdin);
     for(int i=0; i<20; i++)
     {
-        //send_string(global_eid, "Welcome");
-        //nops(DELAY);
+        send_string(global_eid, "Welcome");
+        nops(DELAY);
     }
 
     while (1) {

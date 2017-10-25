@@ -243,6 +243,106 @@ void listener_thread_crypto()
 void listener_thread_nocrypto()
 {
 
+
+    // edge detection thresholds, with hysteresis
+    double threshold_hi = 0.1;  // low to high transition
+    double threshold_lo = 0.01; // high to low transistion
+
+    // bool, measured contention on the RDRAND HW
+    int contention = 0;
+    // filtered contention value
+    double contention_f = 0;
+    double contention_filter = FILTER;
+
+    // the current state in hysteresis, representing the last sampled edge
+    int32_t state = 0; //0-> last sampled falling edge
+    receiving = false;
+
+    // pulse length threshold for determining a 1 or a 0
+    // tuned at runtime by finding pseudo average pulse width
+    double pw_thresh = 314;
+    double pw_thresh_filter = 0.0001; // pseudo average filter
+
+    // array of the last N pulse legths, in # of iterations
+    int32_t pulse_widths[SAMP_BUF_SZ]; // Number of iterations between falling edges
+
+    int32_t bits[SAMP_BUF_SZ];   // buffer of received bits
+    int32_t bit = 0;             // bit sample;
+    int32_t iteration = 0;       // Counter for loop iterations
+
+    // container for received packet, if one is found.
+    packet_t packet;
+
+    // Initialize the buffer of pulse widths
+    for (int i=0; i < SAMP_BUF_SZ; i++)
+        pulse_widths[i] = 0;
+
+    bool listening = true;
+    while (listening)
+    {
+        // sample contention and filter
+        contention = test_n_rdseed(1);
+        contention_f = lpf(contention_f, contention, contention_filter);
+
+        switch(state)
+        {
+            // in low state (last bit was 0, last transition was high to low
+            case 0:
+                // check for low to high transition
+                // if so, reset iteration count to measure pulse width
+                if(contention_f > threshold_hi)
+                {
+                    iteration = 0;
+                    receiving = true;
+                    state = 1;
+                }
+                break;
+
+                // in high state (last bit was 1, last transition was low to high
+            case 1:
+                // check for high to low transition, marking the end of a pulse.
+                // if so: measure pulse and associated bit, and reset to low state
+                if(contention_f < threshold_lo)
+                {
+                    // add pulse width to pulse_widths buffer
+                    shift_in(-iteration, pulse_widths, SAMP_BUF_SZ);
+
+                    // determine bit for associated pulse by comparing the measured
+                    // width against the pw_thresh. Add it to bit buffer.
+                    bit = (iteration<pw_thresh) ? 1:0;
+                    shift_in(bit, bits, SAMP_BUF_SZ);
+
+                    // search bit buffer for packets, and print them if found.
+                    if(search_packet(bits, PACKET_LEN, &packet))
+                    {
+                        char buf[2];
+                        buf[0] = packet;
+                        buf[1] = 0;
+
+                        /* drop package if a message is currently being sent */
+                        if(!sending) {
+                            ocall_print(buf);
+                        }
+                    }
+
+                    // fold this pulse width into the pulse width threshold, if it
+                    // wasn't too long.
+                    if(iteration < 1000)
+                        pw_thresh = lpf(pw_thresh, iteration, pw_thresh_filter);
+
+                    // reset iteration counter and go to low state
+                    iteration = 0;
+                    receiving = false;
+                    state = 0;
+                }
+                break;
+        }
+
+        // wait until next iteration
+        nops(DELAY);
+        iteration++;
+    }
+
 }
 
 double lpf(double v_old, double v_new, double weight)
