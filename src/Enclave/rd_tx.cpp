@@ -42,8 +42,12 @@ void send_string(const char* str)
 void send_packet(packet_t p)
 {
     send_preamble();
+    /* send_byte(0xCC); */
     send_byte(p);
     send_byte(0xCC);
+    /* ack bytes */
+    /* send_byte(0x41); */
+    /* send_byte(0x41); */
 }
 
 
