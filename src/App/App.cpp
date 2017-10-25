@@ -41,7 +41,7 @@ void nops(uint32_t n)
 int main(int argc, char const *argv[]) {
     bool measure_time = false;
     clock_t t;
-    
+
     // Get Enclave
     if (initialize_enclave(&global_eid, "enclave.token", "enclave.signed.so") < 0) {
         std::cout << "Fail to initialize enclave." << std::endl;
@@ -58,7 +58,7 @@ int main(int argc, char const *argv[]) {
         set_key(global_eid, key);
 	set_encryption(global_eid, 1);
     }
-        
+
 
 
     pthread_t threads[2];
@@ -77,9 +77,11 @@ int main(int argc, char const *argv[]) {
     fgets(text_buf, sizeof(text_buf), stdin);
     for(int i=0; i<20; i++)
     {
-        send_string(global_eid, "Welcome");
+        send_string(global_eid, "Tuning....\n");
         nops(DELAY);
     }
+    printf("Tuning Complete.\n");
+    send_string(global_eid, "Other Thread Tuning Complete.\n");
 
     while (1) {
         fgets(text_buf, sizeof(text_buf), stdin);
