@@ -42,7 +42,7 @@ void nops(uint32_t n)
 int main(int argc, char const *argv[]) {
     bool measure_time = false;
     clock_t t;
-    
+
     if(argc >= 2 && strcmp(argv[1], "-t") == 0)
         measure_time = true;
 
@@ -64,6 +64,9 @@ int main(int argc, char const *argv[]) {
     std::cout << "asynchronous call" << std::endl;
 
     printf("Press enter after starting the other process, in order to begin tuning.");
+    char text_buf[128];
+    fgets(text_buf, sizeof(text_buf), stdin);
+
     for(int i=0; i<20; i++)
     {
         send_string(global_eid, "Welcome");
@@ -71,7 +74,6 @@ int main(int argc, char const *argv[]) {
     }
 
     while (1) {
-        char text_buf[128];
         fgets(text_buf, sizeof(text_buf), stdin);
 
         t = clock();
@@ -81,7 +83,7 @@ int main(int argc, char const *argv[]) {
         {
              printf("Transfer Rate: %f B/s\n", (float)strlen(text_buf)/(((float)t)/CLOCKS_PER_SEC));
         }
-        
+
     }
 
     /* both workers are blocking calls, should continue until kill signal is received. */
