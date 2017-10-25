@@ -128,6 +128,9 @@ void listener_thread()
     for (int i=0; i < SAMP_BUF_SZ; i++)
         pulse_widths[i] = 0;
 
+    char* msg = new char[1];
+    int msgIndex = 0;
+    bool listening = true;
     while (listening)
     {
         // sample contention and filter
@@ -171,7 +174,22 @@ void listener_thread()
 
                         /* drop package if a message is currently being sent */
                         if(!sending) {
-                            ocall_print(buf);
+                            /* if end of message */
+                            if(buf == '\n')
+                            {
+                                msg[msgIndex++] = buf;
+                                receiving = false;
+                                ocall_print(msg);
+                                for(int i=1; i< msgIndex; i++)
+                                {
+                                    delete msg[i];
+                                }
+                                msgIndex = 0;
+                            }
+                            else
+                            {
+                                msg[msgIndex++] = buf;
+                            }
                         }
                     }
 
