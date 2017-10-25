@@ -179,7 +179,7 @@ void listener_thread()
                             {
                                 msg[msgIndex++] = buf[0];
                                 receiving = false;
-                                ocall_print(msg, msgIndex);
+                                ocall_print(msg);
                                 delete [] msg;
                                 msgIndex = 0;
                                 msg = new char;

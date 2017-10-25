@@ -24,9 +24,8 @@ void* spawn_listener_thread(void* arguments)
 }
 
 // OCall implementations
-void ocall_print(const char* str, int size) {
-    for(int i=0; i<size; i++)
-        printf("%s", str[i]);
+void ocall_print(const char* str) {
+    printf("%s", str);
 }
 
 void nops(uint32_t n)
@@ -67,7 +66,6 @@ int main(int argc, char const *argv[]) {
     }
 
     while (1) {
-        /* char text_buf[128]; */
         fgets(text_buf, sizeof(text_buf), stdin);
 
         send_string(global_eid, text_buf);
