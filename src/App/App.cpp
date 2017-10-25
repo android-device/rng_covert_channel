@@ -25,7 +25,7 @@ void* spawn_listener_thread(void* arguments)
 }
 
 // OCall implementations
-void ocall_print(const char* str, int size) {
+void ocall_print(const char* str) {
     printf("%s", str);
 }
 
