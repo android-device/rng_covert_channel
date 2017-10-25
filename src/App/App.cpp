@@ -73,6 +73,8 @@ int main(int argc, char const *argv[]) {
         nops(DELAY);
     }
 
+    printf("Tuning Complete.\n");
+
     while (1) {
         fgets(text_buf, sizeof(text_buf), stdin);
 
