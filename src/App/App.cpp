@@ -83,8 +83,6 @@ int main(int argc, char const *argv[]) {
     printf("Tuning Complete.\n");
     send_string(global_eid, "Other Thread: Tuning Complete.\n");
 
-    printf("Tuning Complete.\n");
-
     while (1) {
         fgets(text_buf, sizeof(text_buf), stdin);
 
