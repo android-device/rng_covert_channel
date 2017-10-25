@@ -57,6 +57,7 @@ int main(int argc, char const *argv[]) {
     std::cout << "asynchronous call" << std::endl;
 
     printf("Press enter after starting the other process, in order to begin tuning.\n");
+    char text_buf[128];
     fgets(text_buf, sizeof(text_buf), stdin);
     for(int i=0; i<20; i++)
     {
@@ -65,7 +66,7 @@ int main(int argc, char const *argv[]) {
     }
 
     while (1) {
-        char text_buf[128];
+        /* char text_buf[128]; */
         fgets(text_buf, sizeof(text_buf), stdin);
 
         send_string(global_eid, text_buf);
