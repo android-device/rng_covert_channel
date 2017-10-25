@@ -33,14 +33,14 @@ void send_string(const char* str)
     
     if(use_encryption == 1)
     {
-		uint8_t counter = 0;
+		uint8_t counter[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 		uint32_t len = strlen(str);
 		uint32_t blocks = (len+15)/16;
 		uint8_t * buf = (uint8_t*)malloc(16*blocks);
 
 		strncpy((char*)buf, str, blocks*16);
 
-		sgx_aes_ctr_encrypt(&message_key, buf, blocks*16, &counter, 8, buf);
+		sgx_aes_ctr_encrypt(&message_key, buf, blocks*16, counter, 8, buf);
 
 		/* spin until any messages being received are completely received. */
 		while(receiving) {};
@@ -51,10 +51,8 @@ void send_string(const char* str)
 		//{
 			//send_packet(str[i]);
 		//}
-		send_packet('d');
-		send_packet('o');
-		send_packet('n');
-		send_packet('e');
+		send_packet((uint8_t)'d');
+//		send_packet('e');
 		sending = false;
 		return;
 	}

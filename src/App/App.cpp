@@ -5,7 +5,6 @@
 #include "sgx_urts.h"
 #include "sgx_utils/sgx_utils.h"
 #include <pthread.h>
-#include <time.h>
 
 #define DELAY 1000
 
@@ -73,25 +72,19 @@ int main(int argc, char const *argv[]) {
     pthread_status[0] = pthread_create(&threads[0], NULL, spawn_listener_thread, &pthread_args[0]);
     std::cout << "asynchronous call" << std::endl;
 
-    printf("Press enter after starting the other process, in order to begin tuning.");
+    printf("Press enter after starting the other process, in order to begin tuning.\n");
+    char text_buf[128];
+    fgets(text_buf, sizeof(text_buf), stdin);
     for(int i=0; i<20; i++)
     {
-        send_string(global_eid, "Welcome");
-        nops(DELAY);
+        //send_string(global_eid, "Welcome");
+        //nops(DELAY);
     }
 
     while (1) {
-        char text_buf[128];
         fgets(text_buf, sizeof(text_buf), stdin);
 
-        t = clock();
         send_string(global_eid, text_buf);
-        t = clock() - t;
-        if(measure_time)
-        {
-             printf("Transfer Rate: %f B/s\n", (float)strlen(text_buf)/(((float)t)/CLOCKS_PER_SEC));
-        }
-        
     }
 
     /* both workers are blocking calls, should continue until kill signal is received. */

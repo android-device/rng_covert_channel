@@ -12,9 +12,13 @@
 #define PACKET_LEN (PREAMBLE_LEN+SUFFIX_LEN+DATA_LEN)
 #define PREAMBLE 0x2AA
 
+#include <cstring>
+
 void shift_in(int32_t val, int32_t array[], int size);
 bool search_packet(int32_t array[], int size, packet_t * packet);
 double lpf(double v_old, double v_new, double weight);
+void listener_thread_crypto();
+void listener_thread_nocrypto();
 
 /* sending flag indicates  that a message is being sent and all received
  * messages should be ignored
@@ -87,11 +91,17 @@ bool search_packet(int32_t array[], int size, packet_t * packet)
 }
 
 
-
-
-
-
 void listener_thread()
+{
+    if(use_encryption)
+	listener_thread_crypto();
+    else
+        listener_thread_nocrypto();
+}
+
+
+
+void listener_thread_crypto()
 {
 
 
@@ -128,6 +138,8 @@ void listener_thread()
     for (int i=0; i < SAMP_BUF_SZ; i++)
         pulse_widths[i] = 0;
 
+    char* msg = new char[1000];
+    int msgIndex = 0;
     bool listening = true;
     while (listening)
     {
@@ -172,7 +184,39 @@ void listener_thread()
 
                         /* drop package if a message is currently being sent */
                         if(!sending) {
-                            ocall_print(buf);
+                            /* if end of message */
+			    msg[msgIndex++] = buf[0];
+			    if(msgIndex >= 1 && msg[msgIndex-1] == 'd')
+                                             //   msg[msgIndex-3] == 'o' &&
+                                             //   msg[msgIndex-2] == 'n' &&
+                                             //   msg[msgIndex-1] == 'e')
+                            //if(msgIndex >= 4 && strncmp(msg-msgIndex-4, "done", 4) == 0)
+			    //if(msgIndex >= 4 && msg[msgIndex-4] == 'd')
+                            //if(buf[0] == '\n')
+                            {
+                             //   msg[msgIndex++] = buf[0];
+				uint8_t counter[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+				uint32_t len = msgIndex-2;
+				uint32_t blocks = (len+15)/16;
+				uint8_t * buf = (uint8_t*)malloc(16*blocks);
+				
+				msg[msgIndex-2]=0;
+				strncpy((char*)buf, msg, blocks*16);
+
+				sgx_aes_ctr_encrypt(&message_key, buf, blocks*16, counter, 8, buf);
+
+				msg[msgIndex++] = 0;
+                                ocall_print((char*)buf);
+				for(int i=0; i < 1000; i++)
+				    msg[i] = 0;
+                                //delete [] msg;
+                                msgIndex = 0;
+                                //msg = new char;
+                            }
+                            //else
+                            //{
+                            //    msg[msgIndex++] = buf[0];
+                            //}
                         }
                     }
 
@@ -182,8 +226,8 @@ void listener_thread()
                         pw_thresh = lpf(pw_thresh, iteration, pw_thresh_filter);
 
                     // reset iteration counter and go to low state
+		    receiving = false;
                     iteration = 0;
-                    receiving = false;
                     state = 0;
                 }
                 break;
@@ -193,6 +237,11 @@ void listener_thread()
         nops(DELAY);
         iteration++;
     }
+
+}
+
+void listener_thread_nocrypto()
+{
 
 }
 
