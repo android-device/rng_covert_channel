@@ -25,7 +25,7 @@ void* spawn_listener_thread(void* arguments)
 }
 
 // OCall implementations
-void ocall_print(const char* str, int size) {
+void ocall_print(const char* str) {
     printf("%s", str);
 }
 
@@ -42,7 +42,7 @@ void nops(uint32_t n)
 int main(int argc, char const *argv[]) {
     bool measure_time = false;
     clock_t t;
-
+    
     if(argc >= 2 && strcmp(argv[1], "-t") == 0)
         measure_time = true;
 
@@ -81,7 +81,7 @@ int main(int argc, char const *argv[]) {
         {
              printf("Transfer Rate: %f B/s\n", (float)strlen(text_buf)/(((float)t)/CLOCKS_PER_SEC));
         }
-
+        
     }
 
     /* both workers are blocking calls, should continue until kill signal is received. */
